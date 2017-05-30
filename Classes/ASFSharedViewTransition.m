@@ -78,12 +78,11 @@
 + (void)addTransitionWithFromViewControllerClass:(Class<ASFSharedViewTransitionDataSource>)aFromVCClass
                            ToViewControllerClass:(Class<ASFSharedViewTransitionDataSource>)aToVCClass
                         WithNavigationController:(UINavigationController *)aNav
-                                    WithDuration:(NSTimeInterval)aDuration
 {
     BOOL found = false;
     for (ParamsHolder *holder in [[ASFSharedViewTransition shared] arrParamHolders]) {
         if (holder.fromVCClass == aFromVCClass && holder.toVCClass == aToVCClass) {
-            holder.duration = aDuration;
+            holder.duration = 0;
             holder.nav = aNav;
             holder.nav.delegate = [ASFSharedViewTransition shared];
             
@@ -96,7 +95,7 @@
         ParamsHolder *holder = [[ParamsHolder alloc] init];
         holder.fromVCClass = aFromVCClass;
         holder.toVCClass = aToVCClass;
-        holder.duration = aDuration;
+        holder.duration = 0;
         holder.nav = aNav;
         
         holder.nav.delegate = [ASFSharedViewTransition shared];
@@ -125,9 +124,9 @@
 - (void)animateTransition:(id<UIViewControllerContextTransitioning>)transitionContext
 {
     UIViewController<ASFSharedViewTransitionDataSource> *fromVC =
-        (UIViewController<ASFSharedViewTransitionDataSource> *) [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
+    (UIViewController<ASFSharedViewTransitionDataSource> *) [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
     UIViewController<ASFSharedViewTransitionDataSource> *toVC   =
-        (UIViewController<ASFSharedViewTransitionDataSource> *) [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
+    (UIViewController<ASFSharedViewTransitionDataSource> *) [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
     
     BOOL reversed = false;
     ParamsHolder *pHolder = [self paramHolderForFromVC:fromVC ToVC:toVC reversed:&reversed];
@@ -136,11 +135,24 @@
         return;
     }
     
+    [toVC.view layoutIfNeeded];
     UIView *fromView = [fromVC sharedView];
     UIView *toView = [toVC sharedView];
     
     UIView *containerView = [transitionContext containerView];
-    NSTimeInterval dur = [self transitionDuration:transitionContext];
+
+    NSTimeInterval dur = 0.01;
+    CGRect fromFrame = [containerView convertRect:fromView.frame fromView:fromView.superview];
+    CGRect toFrame = [containerView convertRect:toView.frame fromView:toView.superview];
+    
+    dur = (fromFrame.origin.y * 0.0075) / toFrame.origin.y;
+    
+    if (dur != pHolder.duration && reversed == false) {
+        pHolder.duration = dur;
+    }
+    else {
+        dur = pHolder.duration;
+    }
     
     // Take Snapshot of fomView
     UIView *snapshotView = [fromView snapshotViewAfterScreenUpdates:NO];

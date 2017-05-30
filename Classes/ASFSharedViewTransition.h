@@ -21,7 +21,6 @@
 
 + (void)addTransitionWithFromViewControllerClass:(Class<ASFSharedViewTransitionDataSource>)aFromVCClass
                                   ToViewControllerClass:(Class<ASFSharedViewTransitionDataSource>)aToVCClass
-                        WithNavigationController:(UINavigationController *)aNav
-                                      WithDuration:(NSTimeInterval)aDuration;
+                        WithNavigationController:(UINavigationController *)aNav;
 
 @end
