@@ -147,6 +147,9 @@
     
     dur = (fromFrame.origin.y * 0.0075) / toFrame.origin.y;
     
+    if (isinf(dur)) { // sanity check!
+        dur = 0.5;
+    }
     if (dur != pHolder.duration && reversed == false) {
         pHolder.duration = dur;
     }
